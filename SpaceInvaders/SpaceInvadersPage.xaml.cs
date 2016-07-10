@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Xamarin.Forms;
+using System.Runtime.Serialization;
 
 namespace SpaceInvaders
 {
@@ -11,12 +12,15 @@ namespace SpaceInvaders
 		CancellationTokenSource cts;
 		Task task;
 		Emulator emu;
-		private const int CYCLES_PER_LOOP = 10000000;
+		//Emu8080 emu;
+		private const int CYCLES_PER_LOOP = 16666; // 10000000;
 		private const int WIDTH = 224;
 		private const int HEIGHT = 256;
 
 		private BmpMaker bmp;
 		private ImageSource imageSource;
+		DateTime lastCycle = DateTime.Now;
+
 
 		public SpaceInvadersPage ()
 		{
@@ -31,78 +35,75 @@ namespace SpaceInvaders
 			bmp.SetPixel (100, 100, 255, 0, 0);
 			imageSource = bmp.Generate ();
 			theImage.Source = imageSource;
-			//theImage.Source = ImageSource.FromResource ("SpaceInvaders.peace.jpg");
 		}
 
-		private void DoRun ()
+		void Emu_OneScreen ()
+		{
+
+			imageSource = emu.bmp.Generate ();
+			Device.BeginInvokeOnMainThread (() => {
+				theImage.Source = imageSource;
+				lastCycle = DateTime.Now;
+			});
+
+		}
+
+		private async void DoRun ()
 		{
 			emu = new Emulator ();
+			emu.OneScreen += Emu_OneScreen;
 
-			DateTime lastCycle = DateTime.Now;
 			DateTime thisCycle;
 			TimeSpan deltaTime = new TimeSpan ();
 			int count = 0;
-			int interruptType = 0;
 			DateTime timeInterrupt = DateTime.Now;
-			emu.InterruptMode = 1;
 
 			while (true) {
-				emu.FetchExecute (CYCLES_PER_LOOP);
-				thisCycle = DateTime.Now;
+				//emu.Execute (17000);
+				//emu.Execute (16333);
+				emu.Execute (17066);
+				emu.Execute (17066);
+				//thisCycle = DateTime.Now;
 
-				deltaTime = thisCycle - timeInterrupt;
-				if (deltaTime.TotalMilliseconds > 100) {
-					timeInterrupt = thisCycle;
-					//if (!emu.Interrupt) {
-					switch (interruptType) {
-					case 0:
-						//emu.InterruptMode = 2;
-						//emu.Interrupt = true;
-						//if (!emu.Interrupt) {
-						if (!emu.NonMaskableInterruptPending) {
-							emu.NonMaskableInterrupt = true;
-							interruptType = 1 - interruptType;
-							emu.IFF1 = true;
-							//emu.Interrupt = true;
-						}
-						//}
-						break;
-					case 1:
-						//emu.InterruptMode = 1;
-						//emu.Interrupt = true;
-						//emu.NonMaskableInterrupt = false;
-						//if (!emu.Interrupt) {
-						if (!emu.NonMaskableInterruptPending) {
-							interruptType = 1 - interruptType;
-							emu.IFF1 = true;
-							//emu.NonMaskableInterrupt = false;
-							//emu.Interrupt = true;
-							//}
-						}
-						break;
-						//}
-					}
+				//deltaTime = thisCycle - timeInterrupt;
+				//if (deltaTime.TotalMilliseconds > 8) {
+				//timeInterrupt = thisCycle;
+				/*
+				if (!emu.NonMaskableInterruptPending && !emu.Interrupt) {
+					interruptType = 3 - interruptType;
+					emu.InterruptMode = interruptType;
+					emu.Interrupt = true;
 				}
+				*/
+				//}
+				//emu.FetchExecute (CYCLES_PER_LOOP);
 
+				thisCycle = DateTime.Now;
 				deltaTime = thisCycle - lastCycle;
 				count++;
-				if (deltaTime.TotalMilliseconds > 500) {
-					//System.Diagnostics.Debug.WriteLine (string.Format ("Running at ~{0:N2} MHz", (CyclesPerLoop / 1000d) / (ThisCycle - LastCycle).TotalMilliseconds));
-					System.Diagnostics.Debug.WriteLine (string.Format ("Running at ~{0:N2} MHz", count * (CYCLES_PER_LOOP / 1000d) / (deltaTime).TotalMilliseconds));
+
+				imageSource = emu.bmp.Generate ();
+				Device.BeginInvokeOnMainThread (() => {
+					theImage.Source = imageSource;
+				});
+
+				if (cts != null) {
+					if (cts.IsCancellationRequested) {
+						emu = null;
+						System.Diagnostics.Debug.WriteLine ("Exit");
+						return;
+					}
+				}
+				if (deltaTime.TotalMilliseconds > 1000) {
+					//System.Diagnostics.Debug.WriteLine (string.Format ("Running at ~{0:N2} MHz", count * 33.333 / (deltaTime).TotalMilliseconds));
 					lastCycle = thisCycle;
 					count = 0;
-					imageSource = emu.bmp.Generate ();
-					Device.BeginInvokeOnMainThread (() => {
-						theImage.Source = imageSource;
-					});
+
 				}
-				if (cts != null) {
-					if (cts.IsCancellationRequested)
-						return;
-				}
-			}
-			System.Diagnostics.Debug.WriteLine ("Exit");
+
+			} // while
 		}
+
 
 		void BtLaunch_Clicked (object sender, EventArgs e)
 		{

@@ -7,100 +7,84 @@ namespace Z80
 	{
 		[StructLayout (LayoutKind.Explicit)]
 		[Serializable ()]
-		struct RegisterPair
+		public struct RegisterPair
 		{
+			[FieldOffset (0)]
+			public ushort Word;
 
 			[FieldOffset (0)]
-			public ushort Value16;
-
-			[FieldOffset (0)]
-			public byte Low8;
+			public byte Low;
 
 			[FieldOffset (1)]
-			public byte High8;
+			public byte High;
 
 			public RegisterPair (ushort value)
 			{
-				this.Value16 = value;
-				this.Low8 = (byte)(this.Value16);
-				this.High8 = (byte)(this.Value16 >> 8);
+				Word = value;
+				Low = (byte)(Word);
+				High = (byte)(Word >> 8);
 			}
 
 			public static implicit operator ushort (RegisterPair rp)
 			{
-				return rp.Value16;
+				return rp.Word;
 			}
 
 			public static implicit operator RegisterPair (ushort value)
 			{
 				return new RegisterPair (value);
 			}
-
 		}
 
-		#region Flags
-
 		private bool RegFlagC {
-			get { return (RegAF.Low8 & 0x01) != 0; }
-			set { RegAF.Low8 = (byte)((RegAF.Low8 & ~0x01) | (value ? 0x01 : 0x00)); }
+			get { return (RegAF.Low & 0x01) != 0; }
+			set { RegAF.Low = (byte)((RegAF.Low & ~0x01) | (value ? 0x01 : 0x00)); }
 		}
 
 		private bool RegFlagN {
-			get { return (RegAF.Low8 & 0x02) != 0; }
-			set { RegAF.Low8 = (byte)((RegAF.Low8 & ~0x02) | (value ? 0x02 : 0x00)); }
+			get { return (RegAF.Low & 0x02) != 0; }
+			set { RegAF.Low = (byte)((RegAF.Low & ~0x02) | (value ? 0x02 : 0x00)); }
 		}
 
 		private bool RegFlagP {
-			get { return (RegAF.Low8 & 0x04) != 0; }
-			set { RegAF.Low8 = (byte)((RegAF.Low8 & ~0x04) | (value ? 0x04 : 0x00)); }
+			get { return (RegAF.Low & 0x04) != 0; }
+			set { RegAF.Low = (byte)((RegAF.Low & ~0x04) | (value ? 0x04 : 0x00)); }
 		}
 
 		private bool RegFlag3 {
-			get { return (RegAF.Low8 & 0x08) != 0; }
-			set { RegAF.Low8 = (byte)((RegAF.Low8 & ~0x08) | (value ? 0x08 : 0x00)); }
+			get { return (RegAF.Low & 0x08) != 0; }
+			set { RegAF.Low = (byte)((RegAF.Low & ~0x08) | (value ? 0x08 : 0x00)); }
 		}
 
 		private bool RegFlagH {
-			get { return (RegAF.Low8 & 0x10) != 0; }
-			set { RegAF.Low8 = (byte)((RegAF.Low8 & ~0x10) | (value ? 0x10 : 0x00)); }
+			get { return (RegAF.Low & 0x10) != 0; }
+			set { RegAF.Low = (byte)((RegAF.Low & ~0x10) | (value ? 0x10 : 0x00)); }
 		}
 
 		private bool RegFlag5 {
-			get { return (RegAF.Low8 & 0x20) != 0; }
-			set { RegAF.Low8 = (byte)((RegAF.Low8 & ~0x20) | (value ? 0x20 : 0x00)); }
+			get { return (RegAF.Low & 0x20) != 0; }
+			set { RegAF.Low = (byte)((RegAF.Low & ~0x20) | (value ? 0x20 : 0x00)); }
 		}
 
 		private bool RegFlagZ {
-			get { return (RegAF.Low8 & 0x40) != 0; }
-			set { RegAF.Low8 = (byte)((RegAF.Low8 & ~0x40) | (value ? 0x40 : 0x00)); }
+			get { return (RegAF.Low & 0x40) != 0; }
+			set { RegAF.Low = (byte)((RegAF.Low & ~0x40) | (value ? 0x40 : 0x00)); }
 		}
 
 		private bool RegFlagS {
-			get { return (RegAF.Low8 & 0x80) != 0; }
-			set { RegAF.Low8 = (byte)((RegAF.Low8 & ~0x80) | (value ? 0x80 : 0x00)); }
+			get { return (RegAF.Low & 0x80) != 0; }
+			set { RegAF.Low = (byte)((RegAF.Low & ~0x80) | (value ? 0x80 : 0x00)); }
 		}
-
-		#endregion
-
-		#region Main Register Set
 
 		private RegisterPair RegAF;
 		private RegisterPair RegBC;
 		private RegisterPair RegDE;
 		private RegisterPair RegHL;
 
-		#endregion
-
-		#region Alternate Register Set
-
 		private RegisterPair RegAltAF; // Shadow for A and F
 		private RegisterPair RegAltBC; // Shadow for B and C
 		private RegisterPair RegAltDE; // Shadow for D and E
 		private RegisterPair RegAltHL; // Shadow for H and L
-
-		#endregion
-
-		#region Special Purpose Registers
 
 		private byte RegI; // I (interrupt vector)
 		private byte RegR; // R (memory refresh)
@@ -111,9 +95,6 @@ namespace Z80
 		private RegisterPair RegSP; // SP (stack pointer)
 		private RegisterPair RegPC; // PC (program counter)
 
-		#endregion
-
-
 		private void ResetRegisters ()
 		{
 			// Clear main registers
@@ -122,93 +103,83 @@ namespace Z80
 			RegAltAF = 0; RegAltBC = 0; RegAltDE = 0; RegAltHL = 0;
 			// Clear special purpose registers
 			RegI = 0; RegR = 0;
-			RegIX.Value16 = 0; RegIY.Value16 = 0;
-			RegSP.Value16 = 0; RegPC.Value16 = 0;
+			RegIX.Word = 0; RegIY.Word = 0;
+			RegSP.Word = 0; RegPC.Word = 0;
 		}
 
-		#region Public accessors
-
-		[StateNotSaved ()]
 		public byte RegisterA {
-			get { return RegAF.High8; }
-			set { RegAF.High8 = value; }
+			get { return RegAF.High; }
+			set { RegAF.High = value; }
 		}
 
-		[StateNotSaved ()]
 		public byte RegisterF {
-			get { return RegAF.Low8; }
-			set { RegAF.Low8 = value; }
+			get { return RegAF.Low; }
+			set { RegAF.Low = value; }
 		}
 
 		public ushort RegisterAF {
-			get { return RegAF.Value16; }
-			set { RegAF.Value16 = value; }
+			get { return RegAF.Word; }
+			set { RegAF.Word = value; }
 		}
 
-		[StateNotSaved ()]
 		public byte RegisterB {
-			get { return RegBC.High8; }
-			set { RegBC.High8 = value; }
+			get { return RegBC.High; }
+			set { RegBC.High = value; }
 		}
 
-		[StateNotSaved ()]
 		public byte RegisterC {
-			get { return RegBC.Low8; }
-			set { RegBC.Low8 = value; }
+			get { return RegBC.Low; }
+			set { RegBC.Low = value; }
 		}
 
 		public ushort RegisterBC {
-			get { return RegBC.Value16; }
-			set { RegBC.Value16 = value; }
+			get { return RegBC.Word; }
+			set { RegBC.Word = value; }
 		}
 
-		[StateNotSaved ()]
 		public byte RegisterD {
-			get { return RegDE.High8; }
-			set { RegDE.High8 = value; }
+			get { return RegDE.High; }
+			set { RegDE.High = value; }
 		}
 
-		[StateNotSaved ()]
 		public byte RegisterE {
-			get { return RegDE.Low8; }
-			set { RegDE.Low8 = value; }
+			get { return RegDE.Low; }
+			set { RegDE.Low = value; }
 		}
 		public ushort RegisterDE {
-			get { return RegDE.Value16; }
-			set { RegDE.Value16 = value; }
+			get { return RegDE.Word; }
+			set { RegDE.Word = value; }
 		}
 
-		[StateNotSaved ()]
 		public byte RegisterH {
-			get { return RegHL.High8; }
-			set { RegHL.High8 = value; }
+			get { return RegHL.High; }
+			set { RegHL.High = value; }
 		}
 
-		[StateNotSaved ()]
 		public byte RegisterL {
-			get { return RegHL.Low8; }
-			set { RegHL.Low8 = value; }
+			get { return RegHL.Low; }
+			set { RegHL.Low = value; }
 		}
 		public ushort RegisterHL {
-			get { return RegHL.Value16; }
-			set { RegHL.Value16 = value; }
+			get { return RegHL.Word; }
+			set { RegHL.Word = value; }
 		}
 
 		public ushort RegisterPC {
-			get { return RegPC.Value16; }
-			set { RegPC.Value16 = value; }
+			get { return RegPC.Word; }
+			set { RegPC.Word = value; }
 		}
 		public ushort RegisterSP {
-			get { return RegSP.Value16; }
-			set { RegSP.Value16 = value; }
+			get { return RegSP.Word; }
+			set { RegSP.Word = value; }
 		}
 		public ushort RegisterIX {
-			get { return RegIX.Value16; }
-			set { RegIX.Value16 = value; }
+			get { return RegIX.Word; }
+			set { RegIX.Word = value; }
 		}
 		public ushort RegisterIY {
-			get { return RegIY.Value16; }
-			set { RegIY.Value16 = value; }
+			get { return RegIY.Word; }
+			set { RegIY.Word = value; }
 		}
 		public byte RegisterI {
 			get { return RegI; }
@@ -219,24 +190,21 @@ namespace Z80
 			set { RegR = value; }
 		}
 		public ushort RegisterShadowAF {
-			get { return RegAltAF.Value16; }
-			set { RegAltAF.Value16 = value; }
+			get { return RegAltAF.Word; }
+			set { RegAltAF.Word = value; }
 		}
 		public ushort RegisterShadowBC {
-			get { return RegAltBC.Value16; }
-			set { RegAltBC.Value16 = value; }
+			get { return RegAltBC.Word; }
+			set { RegAltBC.Word = value; }
 		}
 		public ushort RegisterShadowDE {
-			get { return RegAltDE.Value16; }
-			set { RegAltDE.Value16 = value; }
+			get { return RegAltDE.Word; }
+			set { RegAltDE.Word = value; }
 		}
 		public ushort RegisterShadowHL {
-			get { return RegAltHL.Value16; }
-			set { RegAltHL.Value16 = value; }
+			get { return RegAltHL.Word; }
+			set { RegAltHL.Word = value; }
 		}
-
-		#endregion
-
 
 	}
 }

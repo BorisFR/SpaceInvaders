@@ -1,6 +1,6 @@
-﻿namespace Z80
-{
-	public interface IDeserializationCallback
-	{
-	}
-}
+﻿//namespace Z80
+//{
+//	public interface IDeserializationCallback
+//	{
+//	}
+//}

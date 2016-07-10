@@ -1,24 +1,20 @@
-﻿using System;
-namespace Z80
+﻿namespace Z80
 {
-	public partial class Z80 : IDeserializationCallback
+	public partial class Z80
 	{
-
 		private void InitialiseTables ()
 		{
-			this.InitTableInc ();
-			this.InitTableDec ();
-			this.InitTableParity ();
-			this.InitTableALU ();
-			this.InitTableRotShift ();
-			this.InitTableHalfBorrow ();
-			this.InitTableHalfCarry ();
-			this.InitTableNeg ();
-			this.InitTableDaa ();
+			InitTableInc ();
+			InitTableDec ();
+			InitTableParity ();
+			InitTableALU ();
+			InitTableRotShift ();
+			InitTableHalfBorrow ();
+			InitTableHalfCarry ();
+			InitTableNeg ();
+			InitTableDaa ();
 		}
 
-		#region 8-bit increment
-		[NonSerialized ()]
 		private byte [] TableInc;
 		private void InitTableInc ()
 		{
@@ -26,10 +22,7 @@ namespace Z80
 			for (int i = 0; i < 256; ++i)
 				TableInc [i] = FlagByte (false, false, i == 0x80, UndocumentedX (i), (i & 0xF) == 0x0, UndocumentedY (i), i == 0, i > 127);
 		}
-		#endregion
 
-		#region 8-bit decrement
-		[NonSerialized ()]
 		private byte [] TableDec;
 		private void InitTableDec ()
 		{
@@ -37,10 +30,7 @@ namespace Z80
 			for (int i = 0; i < 256; ++i)
 				TableDec [i] = FlagByte (false, true, i == 0x7F, UndocumentedX (i), (i & 0xF) == 0xF, UndocumentedY (i), i == 0, i > 127);
 		}
-		#endregion
 
-		#region Parity
-		[NonSerialized ()]
 		private bool [] TableParity;
 		private void InitTableParity ()
 		{
@@ -53,11 +43,7 @@ namespace Z80
 				TableParity [i] = (Bits & 1) == 0;
 			}
 		}
-		#endregion
 
-		#region ALU operations
-
-		[NonSerialized ()]
 		private ushort [,,,] TableALU;
 		private void InitTableALU ()
 		{
@@ -169,11 +155,6 @@ namespace Z80
 			}
 		}
 
-		#endregion
-
-		#region 8-bit Half Carry/Borrow
-
-		[NonSerialized ()]
 		private bool [,] TableHalfBorrow;
 		private void InitTableHalfBorrow ()
 		{
@@ -196,11 +177,6 @@ namespace Z80
 			}
 		}
 
-		#endregion
-
-		#region Rotate and Shift
-
-		[NonSerialized ()]
 		private ushort [,,] TableRotShift;
 		private void InitTableRotShift ()
 		{
@@ -208,8 +184,6 @@ namespace Z80
 			for (int all = 0; all < 2; all++) {
 				for (int y = 0; y < 8; ++y) {
 					for (int af = 0; af < 65536; af++) {
-
-
 						byte Old = (byte)(af >> 8);
 						bool OldCarry = (af & 0x01) != 0;
 
@@ -217,7 +191,6 @@ namespace Z80
 
 						byte New = Old;
 						if ((y & 1) == 0) {
-
 							if ((Old & 0x80) != 0) ++newAf;
 
 							New <<= 1;
@@ -249,20 +222,14 @@ namespace Z80
 							if (New > 127) newAf |= 0x80;
 							if (New == 0) newAf |= 0x40;
 							if (TableParity [New]) newAf |= 0x04;
-
 						}
 
 						TableRotShift [all, y, af] = (ushort)((newAf & ~0x28) | ((newAf >> 8) & 0x28));
 					}
 				}
 			}
-
 		}
 
-		#endregion
-
-		#region Negation
-		[NonSerialized ()]
 		private ushort [] TableNeg;
 		private void InitTableNeg ()
 		{
@@ -276,16 +243,12 @@ namespace Z80
 				TableNeg [af] = raf;
 			}
 		}
-		#endregion
 
-		#region DAA
-		[NonSerialized ()]
 		private ushort [] TableDaa;
 		private void InitTableDaa ()
 		{
 			TableDaa = new ushort [65536];
 			for (int af = 0; af < 65536; ++af) {
-
 				byte a = (byte)(af >> 8);
 				byte tmp = a;
 
@@ -300,7 +263,6 @@ namespace Z80
 				TableDaa [af] = (ushort)((tmp * 256) + FlagByte (IsC (af) || a > 0x99, IsN (af), TableParity [tmp], UndocumentedX (tmp), ((a ^ tmp) & 0x10) != 0, UndocumentedY (tmp), tmp == 0, tmp > 127));
 			}
 		}
-		#endregion
 
 		private byte FlagByte (bool C, bool N, bool P, bool X, bool H, bool Y, bool Z, bool S)
 		{
@@ -334,13 +296,5 @@ namespace Z80
 		private bool IsY (int value) { return (value & 0x20) != 0; }
 		private bool IsZ (int value) { return (value & 0x40) != 0; }
 		private bool IsS (int value) { return (value & 0x80) != 0; }
-
-
-
-		public void OnDeserialization (object sender)
-		{
-			this.InitialiseTables ();
-		}
-
 	}
 }

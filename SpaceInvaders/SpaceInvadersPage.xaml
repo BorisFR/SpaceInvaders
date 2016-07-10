@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<ContentPage xmlns="http://xamarin.com/schemas/2014/forms" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:local="clr-namespace:SpaceInvaders" x:Class="SpaceInvaders.SpaceInvadersPage">
-	<ScrollView Orientation="Vertical" BackgroundColor="Transparent">
-		<StackLayout Orientation="Vertical">
-			<Image x:Name="theImage" WidthRequest="224" HeightRequest="300" Source="SpaceInvaders.peace.jpg" Aspect="AspectFit" BackgroundColor="Black" />
-			<Button x:Name="btLaunch" Text="Launch" BackgroundColor="Green" />
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:local="clr-namespace:SpaceInvaders" x:Class="SpaceInvaders.SpaceInvadersPage" BackgroundColor="Green">
+	<ScrollView Orientation="Vertical" BackgroundColor="Aqua">
+		<StackLayout Orientation="Vertical" BackgroundColor="Blue">
+			<Image x:Name="theImage" WidthRequest="224" HeightRequest="256" Aspect="AspectFit" BackgroundColor="Purple" />
+			<Button x:Name="btLaunch" Text="Launch" BackgroundColor="Green" TextColor="White" />
 		</StackLayout>
 	</ScrollView>
 </ContentPage>

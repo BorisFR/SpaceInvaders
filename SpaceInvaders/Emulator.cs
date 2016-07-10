@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
+using Z80;
 
 // https://code.google.com/archive/p/cogwheel/
 
@@ -142,15 +143,36 @@ Port 5:
 
 namespace SpaceInvaders
 {
-	public class Emulator : Z80.Z80
+
+	public delegate void DoneScreen ();
+
+	public class Emulator
 	{
+		public event DoneScreen OneScreen;
+
+		private MemoryCallbackSystem memoryCallbacks;
+		private Z80.Z80 cpu;
 		private const int MEMORY_SIZE = 0x4000;
 		private byte [] memory;
+		private int videoCount = 224 * 256;
+		//private int interruptType = 1;
 
-		public BmpMaker bmp = new BmpMaker (300, 300); // (224, 256);
+		public BmpMaker bmp = new BmpMaker (224, 256); // (224, 256);
 
 		public Emulator ()
 		{
+			memoryCallbacks = new MemoryCallbackSystem ();
+			cpu = new Z80.Z80 ();
+			cpu.RegisterSP = 0x00;
+			cpu.ReadHardware = ReadPort;
+			cpu.WriteHardware = WritePort;
+			cpu.MemoryCallbacks = memoryCallbacks;
+			cpu.ReadMemory = ReadMemory;
+			cpu.WriteMemory = WriteMemory;
+			cpu.IRQCallback = IRQCallback;
+			cpu.NMICallback = NMICallback;
+			cpu.InterruptMode = 2;
+
 			memory = new byte [MEMORY_SIZE];
 			// load rom
 			var assembly = typeof (App).GetTypeInfo ().Assembly;
@@ -162,11 +184,17 @@ namespace SpaceInvaders
 			stream.Read (memory, 0x1000, 0x0800);
 			stream = assembly.GetManifestResourceStream ("SpaceInvaders.invaders.e");
 			stream.Read (memory, 0x1800, 0x0800);
-			RegisterPC = 0x00;
 		}
 
+		public void Execute (int cycles)
+		{
+			cpu.ExecuteCycles (cycles);
+			cpu.Interrupt = true;
+		}
 		// Graphics
 
+		int minX = 1; int maxX = 222;
+		int minY = 1; int maxY = 254;
 		private void PlotPixel (int x, int y, int value, int bit)
 		{
 			var bt = (value >> bit) & 1;
@@ -194,13 +222,40 @@ namespace SpaceInvaders
 			video [index + 2] = b;
 			video [index + 3] = 255;
 			*/
-			//bmp.SetPixel (y, x, r, g, b);
-			bmp.SetPixel (256 - y, x, r, g, b);
+			try {
+				bmp.SetPixel (255 - y, x, r, g, b);
+			} catch (Exception err) {
+				System.Diagnostics.Debug.WriteLine ("bug video");
+			}
+			if (x > maxX) {
+				maxX = x;
+				System.Diagnostics.Debug.WriteLine ("MaxX: " + maxX);
+			} else if (x < minX) {
+				minX = x;
+				System.Diagnostics.Debug.WriteLine ("MinX: " + minX);
+			}
+			if (y > maxY) {
+				maxY = y;
+				System.Diagnostics.Debug.WriteLine ("MaxY: " + maxY);
+			} else if (y < minY) {
+				minY = y;
+				System.Diagnostics.Debug.WriteLine ("MinY: " + minY);
+			}
+		}
+
+		void NMICallback ()
+		{
+			cpu.NonMaskableInterrupt = false;
+		}
+
+		void IRQCallback ()
+		{
+			cpu.Interrupt = false;
 		}
 
 		// Memory
 
-		public override byte ReadMemory (ushort address)
+		private byte ReadMemory (ushort address)
 		{
 			if (address < MEMORY_SIZE)
 				return memory [address];
@@ -208,18 +263,25 @@ namespace SpaceInvaders
 				return 0;
 		}
 
-		public override void WriteMemory (ushort address, byte value)
+		public void WriteMemory (ushort address, byte value)
 		{
-			memory [address] = value;
-
-			if (address >= 0x2400) {
-				// Update video memory
-				int b = address - 0x2400;
-				var y = ~(((b & 0x1f) * 8) & 0xFF) & 0xFF;
-				var x = b >> 5;
-				for (var i = 0; i < 8; ++i) {
-					PlotPixel (x, y, value, i);
+			if (address >= 0x2000) {
+				if (address < 0x4000) {
+					memory [address] = value;
+					if (address >= 0x2400) {
+						// Update video memory
+						int b = address - 0x2400;
+						var y = ~(((b & 0x1f) * 8) & 0xFF) & 0xFF;
+						var x = b >> 5;
+						for (var i = 0; i < 8; ++i) {
+							PlotPixel (x, y, value, i);
+						}
+					}
+					//} else {
+					//	System.Diagnostics.Debug.WriteLine ("Writing out of RAM :(");
 				}
+				//} else {
+				//	System.Diagnostics.Debug.WriteLine ("Writing to ROM :(");
 			}
 		}
 
@@ -234,7 +296,7 @@ namespace SpaceInvaders
 		private byte _soff = 0;
 
 
-		public override byte ReadHardware (ushort port)
+		private byte ReadPort (ushort port)
 		{
 			switch (port) {
 			case 0:
@@ -250,7 +312,7 @@ namespace SpaceInvaders
 			return 0x00;
 		}
 
-		public override void WriteHardware (ushort port, byte value)
+		private void WritePort (ushort port, byte value)
 		{
 			switch (port) {
 			case 1:
@@ -272,7 +334,7 @@ namespace SpaceInvaders
 				// sound
 				break;
 			case 6:
-				System.Diagnostics.Debug.WriteLine ("{0}", Convert.ToChar (value + 65));
+				//System.Diagnostics.Debug.WriteLine ("{0}", Convert.ToChar (value + 65));
 				break;
 			}
 		}
