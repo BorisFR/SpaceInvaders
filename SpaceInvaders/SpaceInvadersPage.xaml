@@ -2,7 +2,8 @@
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:local="clr-namespace:SpaceInvaders" x:Class="SpaceInvaders.SpaceInvadersPage" BackgroundColor="Green">
 	<ScrollView Orientation="Vertical" BackgroundColor="Aqua">
 		<StackLayout Orientation="Vertical" BackgroundColor="Blue">
-			<Image x:Name="theImage" WidthRequest="224" HeightRequest="256" Aspect="AspectFit" BackgroundColor="Purple" />
+			<BoxView HeightRequest="30" />
+			<Image x:Name="theImage" WidthRequest="320" HeightRequest="400" Aspect="AspectFit" BackgroundColor="Purple" />
 			<Button x:Name="btLaunch" Text="Launch" BackgroundColor="Green" TextColor="White" />
 		</StackLayout>
 	</ScrollView>

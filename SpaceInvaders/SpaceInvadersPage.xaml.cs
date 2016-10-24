@@ -58,11 +58,15 @@ namespace SpaceInvaders
 			int count = 0;
 			DateTime timeInterrupt = DateTime.Now;
 
+			int toWait = 0;
+			double mhz = 2;
+			const double MHZ = 4.0;
+
 			while (true) {
 				//emu.Execute (17000);
 				//emu.Execute (16333);
 				emu.Execute (17066);
-				emu.Execute (17066);
+				//emu.Execute (17066);
 				//thisCycle = DateTime.Now;
 
 				//deltaTime = thisCycle - timeInterrupt;
@@ -95,11 +99,27 @@ namespace SpaceInvaders
 					}
 				}
 				if (deltaTime.TotalMilliseconds > 1000) {
-					//System.Diagnostics.Debug.WriteLine (string.Format ("Running at ~{0:N2} MHz", count * 33.333 / (deltaTime).TotalMilliseconds));
+					mhz = count * 33.333 / (deltaTime).TotalMilliseconds;
+					if (mhz > MHZ) {
+						if (mhz - MHZ > 1000)
+							toWait += 1000;
+						else if (mhz - MHZ > 100)
+							toWait += 100;
+						else if (mhz - MHZ > 10)
+							toWait += 10;
+						else
+							toWait++;
+					}
+					if (mhz < MHZ)
+						toWait--;
+					System.Diagnostics.Debug.WriteLine (string.Format ("Running at ~{0:N2} MHz ({1} fps - wait {2})", count * 33.333 / (deltaTime).TotalMilliseconds, count, toWait));
 					lastCycle = thisCycle;
 					count = 0;
 
 				}
+
+				if (toWait > 0)
+					await Task.Delay (toWait);
 
 			} // while
 		}
