@@ -60,7 +60,7 @@ namespace SpaceInvaders
 
 			int toWait = 0;
 			double mhz = 2;
-			const double MHZ = 4.0;
+			const double MHZ = 3.5;
 
 			while (true) {
 				//emu.Execute (17000);
