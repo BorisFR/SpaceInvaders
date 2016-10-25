@@ -88,15 +88,11 @@ namespace SpaceInvaders
 
 			int toWait = 0;
 			double mhz = 2;
-<<<<<<< HEAD
-			const double MHZ = 3.5;
-=======
 			const double MHZ = 2.0;
 			const int millisSec = 50;
 			const int second = 1000;
 			const double frequency = second / millisSec;
 			const int instructionsPerFrequency = (int)(CYCLES_PER_LOOP / frequency); // * millisSec / second;
->>>>>>> 3fde4ec... tuning IPS resize display
 
 			System.Diagnostics.Debug.WriteLine ($"Frequency: {millisSec} ms");
 			System.Diagnostics.Debug.WriteLine ($"IPF: {instructionsPerFrequency}");
