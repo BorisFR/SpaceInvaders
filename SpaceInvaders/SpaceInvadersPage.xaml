@@ -3,8 +3,9 @@
 	<ScrollView Orientation="Vertical" BackgroundColor="Aqua">
 		<StackLayout Orientation="Vertical" BackgroundColor="Blue">
 			<BoxView HeightRequest="30" />
-			<Image x:Name="theImage" WidthRequest="320" HeightRequest="400" Aspect="AspectFit" BackgroundColor="Purple" />
+			<Image x:Name="theImage" WidthRequest="320" HeightRequest="450" Aspect="AspectFit" BackgroundColor="Purple" />
 			<Button x:Name="btLaunch" Text="Launch" BackgroundColor="Green" TextColor="White" />
+			<Button x:Name="btStop" Text="Stop" BackgroundColor="Green" TextColor="White" />
 		</StackLayout>
 	</ScrollView>
 </ContentPage>
