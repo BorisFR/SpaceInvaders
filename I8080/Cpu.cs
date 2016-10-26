@@ -71,7 +71,7 @@ namespace eZet.i8080.Emulator
 		}
 
 
-		internal void run ()
+		internal async void run ()
 		{
 			initialize ();
 			int throttleCycle = 0;

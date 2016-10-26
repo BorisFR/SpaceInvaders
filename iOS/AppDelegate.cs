@@ -18,6 +18,7 @@ namespace SpaceInvaders.iOS
 
 			return base.FinishedLaunching (app, options);
 		}
+
 	}
 }
 

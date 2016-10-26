@@ -40,6 +40,20 @@ namespace SpaceInvaders
 			btStop.IsEnabled = false;
 		}
 
+		protected override void OnSizeAllocated (double width, double height)
+		{
+			base.OnSizeAllocated (width, height);
+			// WidthRequest="1320" HeightRequest="1450" 
+			if (width * height > 0) {
+				if (width < height) {
+					theImage.WidthRequest = width;
+					theImage.HeightRequest = HEIGHT * width / WIDTH;
+				} else {
+					theImage.HeightRequest = height;
+					theImage.WidthRequest = WIDTH * height / HEIGHT;
+				}
+			}
+		}
 
 		void BtLaunch_Clicked (object sender, EventArgs e)
 		{
