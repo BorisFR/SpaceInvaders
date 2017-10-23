@@ -3,6 +3,9 @@ using System.IO;
 using System.Reflection;
 using Z80;
 
+// http://www.computerarcheology.com/Arcade/SpaceInvaders/
+// http://brentradio.com/images/SpaceInvaders/Midway8080SystemBoards.html
+
 // https://code.google.com/archive/p/cogwheel/
 
 /*

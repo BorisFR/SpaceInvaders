@@ -13,7 +13,7 @@ namespace SpaceInvaders
 		Task task;
 		Emulator emu;
 		//Emu8080 emu;
-		private const int CYCLES_PER_LOOP = 290000; // 16666; // 10000000;
+		//private const int CYCLES_PER_LOOP = 290000; // 16666; // 10000000;
 		private const int WIDTH = 224;
 		private const int HEIGHT = 256;
 
@@ -101,12 +101,22 @@ namespace SpaceInvaders
 			DateTime timeInterrupt = DateTime.Now;
 
 			int toWait = 0;
-			double mhz = 2;
-			const double MHZ = 2.0;
-			const int millisSec = 50;
+			const double MHz = 2.0; // fréquence du processeur en Mega Hertz
+			const double KHz = MHz * 1000; // en Kilo Hertz
+			const double Hz = KHz * 1000; // en Hertz
+										  //const double FrequencePerSecond = 1 / Hz; // soit le nombre de cycles par seconde
+										  //const double FrequencePerMilliSec = 1000 / Hz; // nombre de cycles par milli-seconde
+
+			// cf https://en.wikipedia.org/wiki/Instructions_per_secondMIPS
+			const double INSTRUCTIONS_PER_CLOCK_CYCLE = 0.145;
+			const double CYCLES_PER_LOOP = INSTRUCTIONS_PER_CLOCK_CYCLE * Hz; // 290000;
+
+
+			const int millisSec = 60;
 			const int second = 1000;
 			const double frequency = second / millisSec;
 			const int instructionsPerFrequency = (int)(CYCLES_PER_LOOP / frequency); // * millisSec / second;
+																					 //const int instructionsPerFrequency = (int)(CYCLES_PER_LOOP);
 
 			System.Diagnostics.Debug.WriteLine ($"Frequency: {millisSec} ms");
 			System.Diagnostics.Debug.WriteLine ($"IPF: {instructionsPerFrequency}");
@@ -117,7 +127,7 @@ namespace SpaceInvaders
 				//emu.FetchExecute (CYCLES_PER_LOOP);
 				emu.Execute (instructionsPerFrequency);
 
-				// do wa have to stop?
+				// do we have to stop?
 				if (cts != null) {
 					if (cts.IsCancellationRequested) {
 						emu = null;
@@ -137,6 +147,7 @@ namespace SpaceInvaders
 				// calculate elaps time
 				thisCycle = DateTime.Now;
 				deltaTime = thisCycle - lastCycle;
+				lastCycle = thisCycle;
 
 				// calculate the slowdown
 				if (deltaTime.TotalMilliseconds < millisSec) {
@@ -161,8 +172,8 @@ namespace SpaceInvaders
 						toWait--;
 						*/
 					//System.Diagnostics.Debug.WriteLine (string.Format ("Running at ~{0:N2} MHz ({1} fps - wait {2})", count * 33.333 / (deltaTime).TotalMilliseconds, count, toWait));
-					//System.Diagnostics.Debug.WriteLine (string.Format ("Running at ~{0:N2} MHz ({1} fps - wait {2})", count * 33.333 / (deltaTime).TotalMilliseconds, count, toWait));
-					System.Diagnostics.Debug.WriteLine (string.Format ("{0} fps - wait {1}", count, toWait));
+					System.Diagnostics.Debug.WriteLine (string.Format ("Running @ ~{0:N2} MHz / {1} fps / wait {2}", (count / INSTRUCTIONS_PER_CLOCK_CYCLE) / (deltaTime).TotalMilliseconds / 100, count, toWait));
+					//System.Diagnostics.Debug.WriteLine (string.Format ("{0} fps - wait {1}", count, toWait));
 					timerFps = thisCycle;
 					count = 0;
 				}
@@ -171,7 +182,7 @@ namespace SpaceInvaders
 				if (toWait > 0)
 					await Task.Delay (toWait);
 
-				lastCycle = DateTime.Now;
+				//lastCycle = DateTime.Now;
 
 			} // while
 		}
