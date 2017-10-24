@@ -206,6 +206,7 @@ namespace SpaceInvaders
 			var g = 0;
 			var b = 0;
 			if (bt > 0) {
+				/*
 				if (y >= 184 && y <= 238 && x >= 0 && x <= 223)
 					g = 255;
 				else if (y >= 240 && y <= 247 && x >= 16 && x <= 133)
@@ -216,7 +217,14 @@ namespace SpaceInvaders
 					r = 255;
 				} else {
 					r = 255;
-				}
+				}*/
+				if (y > 239) {
+					if (x < 16 || x > 133) {
+						g = 255;
+						b = 255;
+						r = 255;
+					} else { g = 255; }
+				} else if (y > 183) { g = 255; } else if (y > 63) { g = 255; r = 255; b = 255; } else if (y > 31) { r = 255; } else { g = 255; r = 255; b = 255; }
 			}
 			/*
 			var index = y * (4 * 224) + x * 4;
@@ -288,10 +296,32 @@ namespace SpaceInvaders
 			}
 		}
 
+		/*
+		 * 
+         * Read 1
+			BIT	0	coin (0 when active)
+				1	P2 start button
+				2	P1 start button
+				3	?
+				4	P1 shoot button
+				5	P1 joystick left
+				6	P1 joystick right
+				7	?
+		
+			Read 2
+			BIT	0,1	dipswitch number of lives (0:3,1:4,2:5,3:6)
+				2	tilt 'button'
+				3	dipswitch bonus life at 1:1000,0:1500
+				4	P2 shoot button
+				5	P2 joystick left
+				6	P2 joystick right
+				7	dipswitch coin info 1:off,0:on
+		*/
+
 		// Hardware
 
 		private byte _p1 = 0;
-		private byte _p2 = 0;
+		private byte _p2 = (byte)Convert.ToInt32 ("10001000", 2); // 0;
 		private byte _p3 = 0;
 		private byte _p5 = 0;
 		private byte _s0 = 0;
@@ -305,7 +335,34 @@ namespace SpaceInvaders
 			case 0:
 				return 0x0f;
 			case 1:
-				return _p1;
+				byte val = 0;
+				if (Global.ButtonInsertCoin) {
+					Global.ButtonInsertCoin = false;
+					//byte ret = (byte)(_p1 | 1);
+					//return ret;
+					val = 1;
+				}
+				if (Global.ButtonStartP1) {
+					Global.ButtonStartP1 = false;
+					//byte ret = (byte)(_p1 | 4);
+					//return ret;
+					val = (byte)(val | 4);
+				}
+				if (Global.ButtonP1Fire) {
+					Global.ButtonP1Fire = false;
+					val = (byte)(val | 16);
+				}
+				if (Global.ButtonP1Left) {
+					//Global.ButtonP1Left = false;
+					val = (byte)(val | 32);
+				}
+				if (Global.ButtonP1Right) {
+					//Global.ButtonP1Right = false;
+					val = (byte)(val | 64);
+				}
+				byte ret = (byte)(_p1 | val);
+				return ret;
+			//return _p1;
 			case 2:
 				return _p2;
 			case 3:

@@ -22,12 +22,20 @@ namespace SpaceInvaders
 		DateTime lastCycle = DateTime.Now;
 		DateTime timerFps = DateTime.Now;
 
-
 		public SpaceInvadersPage ()
 		{
 			InitializeComponent ();
 			btLaunch.Clicked += BtLaunch_Clicked;
 			btStop.Clicked += BtStop_Clicked;
+			btCoin.Clicked += BtCoin_Clicked;
+			btP1Start.Clicked += BtP1Start_Clicked;
+			//btP1Left.Clicked += BtP1Left_Clicked;
+			//btP1Right.Clicked += BtP1Right_Clicked;
+			btP1Shoot.Clicked += BtP1Shoot_Clicked;
+			btP1Left.Pressed += (sender, e) => { Global.ButtonP1Left = true; };
+			btP1Left.Released += (sender, e) => { Global.ButtonP1Left = false; };
+			btP1Right.Pressed += (sender, e) => { Global.ButtonP1Right = true; };
+			btP1Right.Released += (sender, e) => { Global.ButtonP1Right = false; };
 			bmp = new BmpMaker (WIDTH, HEIGHT);
 
 			for (int row = 0; row < HEIGHT; row++)
@@ -38,6 +46,7 @@ namespace SpaceInvaders
 			imageSource = bmp.Generate ();
 			theImage.Source = imageSource;
 			btStop.IsEnabled = false;
+			theMarquee.Source = ImageSource.FromResource ("SpaceInvaders.marquee.jpg");
 		}
 
 		protected override void OnSizeAllocated (double width, double height)
@@ -77,6 +86,31 @@ namespace SpaceInvaders
 			btStop.IsEnabled = false;
 			cts.Cancel ();
 			btLaunch.IsEnabled = true;
+		}
+
+		void BtCoin_Clicked (object sender, EventArgs e)
+		{
+			Global.ButtonInsertCoin = true;
+		}
+
+		void BtP1Start_Clicked (object sender, EventArgs e)
+		{
+			Global.ButtonStartP1 = true;
+		}
+
+		void BtP1Left_Clicked (object sender, EventArgs e)
+		{
+			Global.ButtonP1Left = true;
+		}
+
+		void BtP1Right_Clicked (object sender, EventArgs e)
+		{
+			Global.ButtonP1Right = true;
+		}
+
+		void BtP1Shoot_Clicked (object sender, EventArgs e)
+		{
+			Global.ButtonP1Fire = true;
 		}
 
 		void Emu_OneScreen ()
