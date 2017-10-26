@@ -8,6 +8,7 @@ namespace SpaceInvaders
 {
 	public partial class SpaceInvadersPage : ContentPage
 	{
+		bool isRunning = false;
 		Action action;
 		CancellationTokenSource cts;
 		Task task;
@@ -25,8 +26,7 @@ namespace SpaceInvaders
 		public SpaceInvadersPage ()
 		{
 			InitializeComponent ();
-			btLaunch.Clicked += BtLaunch_Clicked;
-			btStop.Clicked += BtStop_Clicked;
+			btEmu.Clicked += BtEmu_Clicked;
 			btCoin.Clicked += BtCoin_Clicked;
 			btP1Start.Clicked += BtP1Start_Clicked;
 			//btP1Left.Clicked += BtP1Left_Clicked;
@@ -45,7 +45,6 @@ namespace SpaceInvaders
 			bmp.SetPixel (100, 100, 255, 0, 0);
 			imageSource = bmp.Generate ();
 			theImage.Source = imageSource;
-			btStop.IsEnabled = false;
 			theMarquee.Source = ImageSource.FromResource ("SpaceInvaders.marquee.jpg");
 		}
 
@@ -64,28 +63,34 @@ namespace SpaceInvaders
 			}
 		}
 
+		void BtEmu_Clicked (object sender, EventArgs e)
+		{
+			if (!isRunning) {
+				btEmu.Text = "Stop";
+				if (task != null) {
+					if (!task.IsCompleted) {
+						cts.Cancel ();
+						return;
+					}
+					cts = null;
+				}
+				cts = new CancellationTokenSource ();
+				action = new Action (DoRun);
+				task = new Task (action, cts.Token);
+				task.Start ();
+			} else {
+				btEmu.Text = "Launch";
+				cts.Cancel ();
+			}
+			isRunning = !isRunning;
+		}
+
 		void BtLaunch_Clicked (object sender, EventArgs e)
 		{
-			btLaunch.IsEnabled = false;
-			if (task != null) {
-				if (!task.IsCompleted) {
-					cts.Cancel ();
-					return;
-				}
-				cts = null;
-			}
-			cts = new CancellationTokenSource ();
-			action = new Action (DoRun);
-			task = new Task (action, cts.Token);
-			task.Start ();
-			btStop.IsEnabled = true;
 		}
 
 		void BtStop_Clicked (object sender, EventArgs e)
 		{
-			btStop.IsEnabled = false;
-			cts.Cancel ();
-			btLaunch.IsEnabled = true;
 		}
 
 		void BtCoin_Clicked (object sender, EventArgs e)

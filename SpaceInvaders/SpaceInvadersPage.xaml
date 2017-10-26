@@ -5,15 +5,14 @@
 			<!--<BoxView HeightRequest="30" />-->
 			<Image x:Name="theMarquee" Aspect="AspectFit" BackgroundColor="Red" />
 			<Image x:Name="theImage" Aspect="AspectFit" BackgroundColor="Purple" />
-			<Button x:Name="btLaunch" Text="Launch" BackgroundColor="Green" TextColor="White" />
-			<Button x:Name="btStop" Text="Stop" BackgroundColor="Green" TextColor="White" />
+			<Button x:Name="btEmu" Text="Launch" BackgroundColor="Green" TextColor="White" />
 			<StackLayout Orientation="Horizontal">
 				<Button x:Name="btCoin" Text="Insert Coin" />
 				<Button x:Name="btP1Start" Text="Start" />
 				<Button x:Name="btP1Left" Text="&lt;" />
 				<Button x:Name="btP1Right" Text="&gt;" />
-				<Button x:Name="btP1Shoot" Text="Fire" />
 			</StackLayout>
+			<Button x:Name="btP1Shoot" Text="Fire" />
 		</StackLayout>
 	</ScrollView>
 </ContentPage>
